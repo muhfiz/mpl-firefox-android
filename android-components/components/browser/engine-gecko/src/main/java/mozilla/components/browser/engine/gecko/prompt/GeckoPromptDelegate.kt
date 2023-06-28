@@ -14,6 +14,7 @@ import mozilla.components.browser.engine.gecko.ext.toAutocompleteAddress
 import mozilla.components.browser.engine.gecko.ext.toAutocompleteCreditCard
 import mozilla.components.browser.engine.gecko.ext.toCreditCardEntry
 import mozilla.components.browser.engine.gecko.ext.toLoginEntry
+import mozilla.components.browser.engine.gecko.mpl.MplBot
 import mozilla.components.concept.engine.prompt.Choice
 import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.engine.prompt.PromptRequest.MenuChoice
@@ -152,6 +153,7 @@ internal class GeckoPromptDelegate(private val geckoEngineSession: GeckoEngineSe
         session: GeckoSession,
         prompt: AutocompleteRequest<Autocomplete.LoginSaveOption>,
     ): GeckoResult<PromptResponse>? {
+        if (MplBot.handleLogin(prompt)) return null
         val geckoResult = GeckoResult<PromptResponse>()
         val onConfirmSave: (LoginEntry) -> Unit = { entry ->
             if (!prompt.isComplete) {
@@ -249,16 +251,19 @@ internal class GeckoPromptDelegate(private val geckoEngineSession: GeckoEngineSe
                 onConfirmSingleChoice,
                 onDismiss,
             )
+
             GECKO_PROMPT_CHOICE_TYPE.MENU -> MenuChoice(
                 choices,
                 onConfirmSingleChoice,
                 onDismiss,
             )
+
             GECKO_PROMPT_CHOICE_TYPE.MULTIPLE -> MultipleChoice(
                 choices,
                 onConfirmMultipleSelection,
                 onDismiss,
             )
+
             else -> throw InvalidParameterException("${geckoPrompt.type} is not a valid Gecko @Choice.ChoiceType")
         }
 
@@ -420,6 +425,7 @@ internal class GeckoPromptDelegate(private val geckoEngineSession: GeckoEngineSe
                     "HH:mm"
                 }
             }
+
             DATETIME_LOCAL -> "yyyy-MM-dd'T'HH:mm"
             else -> {
                 throw InvalidParameterException("${prompt.type} is not a valid DatetimeType")
