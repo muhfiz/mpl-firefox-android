@@ -18,6 +18,7 @@ import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.cookiebanners.GeckoCookieBannersStorage
 import mozilla.components.browser.engine.gecko.cookiebanners.ReportSiteDomainsRepository
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
+import mozilla.components.browser.engine.gecko.mpl.MplBot
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.session.storage.SessionStorage
@@ -151,7 +152,7 @@ class Core(
             geckoRuntime,
         ).also {
             WebCompatFeature.install(it)
-
+            MplBot.initialize(context, geckoRuntime, it)
             /**
              * There are some issues around localization to be resolved, as well as questions around
              * the capacity of the WebCompat team, so the "Report site issue" feature should stay
