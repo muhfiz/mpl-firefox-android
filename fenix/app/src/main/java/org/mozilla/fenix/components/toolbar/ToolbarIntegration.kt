@@ -5,13 +5,18 @@
 package org.mozilla.fenix.components.toolbar
 
 import android.content.Context
+import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.toolbar.BrowserToolbar
 import mozilla.components.browser.toolbar.display.DisplayToolbar
+import mozilla.components.concept.toolbar.Toolbar
+import mozilla.components.feature.tabs.toolbar.ActionClickableImage
 import mozilla.components.feature.tabs.toolbar.TabCounterToolbarButton
 import mozilla.components.feature.toolbar.ToolbarBehaviorController
 import mozilla.components.feature.toolbar.ToolbarFeature
@@ -145,6 +150,13 @@ class DefaultToolbarIntegration(
         tabsAction.updateCount(tabCount)
 
         toolbar.addBrowserAction(tabsAction)
+        toolbar.addBrowserAction(
+            ActionClickableImage(
+                imageDrawable = AppCompatResources.getDrawable(context, R.drawable.mpl_logo)!!,
+                contentDescription = "Mpl Button",
+                onClick = { interactor.onMplButtonClicked() }
+            )
+        )
     }
 
     override fun start() {

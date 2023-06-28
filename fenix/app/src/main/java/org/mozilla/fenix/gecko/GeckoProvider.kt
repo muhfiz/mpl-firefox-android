@@ -53,6 +53,7 @@ object GeckoProvider {
         val builder = GeckoRuntimeSettings.Builder()
 
         val runtimeSettings = builder
+            .consoleOutput(true)
             .crashHandler(CrashHandlerService::class.java)
             .telemetryDelegate(GeckoAdapter())
             .contentBlocking(policy.toContentBlockingSetting())

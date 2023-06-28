@@ -27,6 +27,7 @@ interface BrowserToolbarInteractor {
      * Navigates to the Home screen. Called when a user taps on the Home button.
      */
     fun onHomeButtonClicked()
+    fun onMplButtonClicked()
 }
 
 /**
@@ -76,5 +77,9 @@ class DefaultBrowserToolbarInteractor(
 
     override fun onHomeButtonClicked() {
         browserToolbarController.handleHomeButtonClick()
+    }
+
+    override fun onMplButtonClicked() {
+        browserToolbarController.handleMplButtonClicked()
     }
 }

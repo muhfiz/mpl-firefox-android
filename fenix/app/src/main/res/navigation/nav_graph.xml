@@ -165,6 +165,11 @@
         app:popUpTo="@id/tabsTrayFragment"
         app:popUpToInclusive="true" />
     <action
+        android:id="@+id/action_global_mplbotFragment"
+        app:destination="@id/mplbotFragment"
+        app:popUpTo="@id/mplbotFragment"
+        app:popUpToInclusive="true" />
+    <action
         android:id="@+id/action_global_savedLoginsAuthFragment"
         app:destination="@id/savedLoginsAuthFragment" />
     <action
@@ -197,6 +202,11 @@
     <fragment
         android:id="@+id/startupFragment"
         android:name="org.mozilla.fenix.StartupFragment">
+    </fragment>
+
+    <fragment
+        android:id="@+id/mplbotFragment"
+        android:name="org.mozilla.fenix.mpl.MplBotFragment">
     </fragment>
 
     <fragment

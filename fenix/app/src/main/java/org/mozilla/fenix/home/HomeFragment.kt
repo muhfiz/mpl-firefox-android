@@ -63,6 +63,7 @@ import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
 import org.mozilla.fenix.GleanMetrics.HomeScreen
 import org.mozilla.fenix.GleanMetrics.PrivateBrowsingShortcutCfr
 import org.mozilla.fenix.HomeActivity
+import org.mozilla.fenix.NavGraphDirections
 import org.mozilla.fenix.R
 import org.mozilla.fenix.addons.showSnackBar
 import org.mozilla.fenix.browser.browsingmode.BrowsingMode
@@ -524,6 +525,16 @@ class HomeFragment : Fragment() {
             navController = findNavController(),
             tabCounter = binding.tabButton,
         )
+
+        binding.mplButton.setOnClickListener {
+            findNavController().let { navController ->
+                navController.nav(
+                    navController.currentDestination?.id,
+                    NavGraphDirections.actionGlobalMplbotFragment()
+                )
+            }
+
+        }
 
         toolbarView?.build()
 

@@ -19,6 +19,7 @@ import mozilla.components.ui.tabcounter.TabCounterMenu
 import org.mozilla.fenix.GleanMetrics.Events
 import org.mozilla.fenix.GleanMetrics.ReaderMode
 import org.mozilla.fenix.HomeActivity
+import org.mozilla.fenix.NavGraphDirections
 import org.mozilla.fenix.R
 import org.mozilla.fenix.browser.BrowserAnimator
 import org.mozilla.fenix.browser.BrowserAnimator.Companion.getToolbarNavOptions
@@ -47,6 +48,7 @@ interface BrowserToolbarController {
      * @see [BrowserToolbarInteractor.onHomeButtonClicked]
      */
     fun handleHomeButtonClick()
+    fun handleMplButtonClicked()
 }
 
 @Suppress("LongParameterList")
@@ -178,6 +180,13 @@ class DefaultBrowserToolbarController(
                 BrowserFragmentDirections.actionGlobalHome(),
             )
         }
+    }
+
+    override fun handleMplButtonClicked() {
+        navController.nav(
+            navController.currentDestination?.id,
+            NavGraphDirections.actionGlobalMplbotFragment()
+        )
     }
 
     companion object {
