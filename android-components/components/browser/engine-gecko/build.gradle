@@ -60,6 +60,8 @@ dependencies {
     implementation(project(':service-nimbus')) {
         exclude group: 'org.mozilla.telemetry', module: 'glean-native'
     }
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
     implementation ComponentsDependencies.kotlin_coroutines
 
     api ComponentsDependencies.mozilla_geckoview
@@ -76,6 +78,8 @@ dependencies {
     testImplementation ComponentsDependencies.testing_mockwebserver
     testImplementation project(':support-test')
     testImplementation project(':tooling-fetch-tests')
+    testImplementation "io.mockk:mockk:1.13.5"
+    testImplementation 'com.google.code.gson:gson:2.10.1'
 
     // We only compile against Glean. It's up to the app to add those dependencies
     // if it wants to collect GeckoView telemetry through the Glean SDK.
