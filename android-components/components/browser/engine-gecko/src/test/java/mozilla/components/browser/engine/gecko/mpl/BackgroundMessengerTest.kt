@@ -14,6 +14,7 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.concept.engine.webextension.WebExtension
@@ -23,6 +24,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Assert.*
+import kotlin.reflect.typeOf
 
 @RunWith(AndroidJUnit4::class)
 class BackgroundMessengerTest {
@@ -45,6 +47,11 @@ class BackgroundMessengerTest {
         {
             id: $generatedMessageId,
             response: $message
+        }
+    """.trimIndent())
+    val requestGeneratedMessageIdMessage = JSONObject("""
+        {
+            type: ${MessageType.BGtoNV.GENERATE_MESSAGE_ID}
         }
     """.trimIndent())
 
@@ -88,6 +95,14 @@ class BackgroundMessengerTest {
                 MplBot.MPLBOT_PORT_NAME, ofType()
             )
         }
+    }
+
+    @Test
+    fun `when one-called message receiving requestGeneratedMessageIdMessage, the answer should be generatedId`(){
+        assertEquals(
+            messageHandlerSlot.captured.onMessage(requestGeneratedMessageIdMessage, mockk()),
+            generatedMessageId
+        )
     }
 
     @Test
@@ -168,5 +183,4 @@ class BackgroundMessengerTest {
             })
         }
     }
-
 }

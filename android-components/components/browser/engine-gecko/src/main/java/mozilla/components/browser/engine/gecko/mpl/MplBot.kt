@@ -7,6 +7,7 @@ package mozilla.components.browser.engine.gecko.mpl
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -36,13 +37,13 @@ object MplBot {
     private var webExtension: WebExtension? = null
         set(value){
             field = value
-            field?.registerBackgroundMessageHandler(
-                MPLBOT_PORT_NAME,
-                MplBotMessageHandler,
-            )
+            value?.let {  
+                backgroundMessenger = BackgroundMessenger(it)
+            }
         }
     private var latestIdentifiedLoginCredential: LoginCredential? = null
     private lateinit var loginCredentialStore: LoginCredentialStore
+    private lateinit var backgroundMessenger: BackgroundMessenger
 
     lateinit var conf: MplConfigurations
         private set

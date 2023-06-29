@@ -1,5 +1,8 @@
 package mozilla.components.browser.engine.gecko.mpl
 
+import android.util.Log
+import com.google.gson.Gson
+import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.concept.engine.webextension.WebExtension
@@ -15,35 +18,46 @@ class BackgroundMessenger(webExtension: WebExtension) {
     init {
         webExtension.registerBackgroundMessageHandler(
             MplBot.MPLBOT_PORT_NAME,
-            object: MessageHandler{
+            object : MessageHandler {
                 override fun onPortConnected(port: Port) {
+                    Log.d("rr333", "onPortConnected: $port")
                     this@BackgroundMessenger.port = port
                 }
 
                 override fun onPortMessage(message: Any, port: Port) {
-                    if(message !is JSONObject) return
+                    Log.d("rr333", "onPortMessage: $message")
+
+                    if (message !is JSONObject) return
                     val messageId = message.optInt("id", -1)
-                    if(messageId == -1) return
+                    if (messageId == -1) return
 
                     message.optJSONObject("request")?.let { unbundledMessage ->
-                        listener?.invoke(unbundledMessage){response ->
+                        listener?.invoke(unbundledMessage) { response ->
                             this@BackgroundMessenger.port.postMessage(
                                 bundleResponseMessage(response, messageId)
                             )
                         }
                     }
-                    message.optJSONObject("response")?.let {unbundledMessage ->
+                    message.optJSONObject("response")?.let { unbundledMessage ->
                         sentMessageResponses[messageId]?.invoke(unbundledMessage)
                     }
                 }
-            }
+
+                override fun onMessage(message: Any, source: EngineSession?): Any? {
+                    if(message !is JSONObject) return null
+                    return when(message.getString("type")){
+                        MessageType.BGtoNV.GENERATE_MESSAGE_ID -> { Message.generateMessageId()}
+                        else -> null    
+                    }
+                }
+            },
         )
     }
 
     fun postMessage(message: JSONObject, onResponse: ((response: JSONObject) -> Unit)? = null){
         val messageId = Message.generateMessageId()
         port.postMessage(bundleRequestMessage(message, messageId))
-        if(onRsentMessageResponses[messageId] = onResponse
+        if(onResponse != null) sentMessageResponses[messageId] = onResponse
     }
 
     fun setListener(listener: BackgroundMessengerListener){
