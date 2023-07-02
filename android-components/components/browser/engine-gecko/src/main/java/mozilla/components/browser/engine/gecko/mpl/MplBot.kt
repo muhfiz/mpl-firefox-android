@@ -7,19 +7,16 @@ package mozilla.components.browser.engine.gecko.mpl
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.webextension.MessageHandler
-import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.concept.engine.webextension.WebExtension
 import mozilla.components.concept.engine.webextension.WebExtensionRuntime
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.content.PreferencesHolder
 import mozilla.components.support.ktx.android.content.booleanPreference
-import org.json.JSONObject
 import org.mozilla.geckoview.Autocomplete
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
@@ -37,13 +34,13 @@ object MplBot {
     private var webExtension: WebExtension? = null
         set(value){
             field = value
-            value?.let {  
-                backgroundMessenger = BackgroundMessenger(it)
+            value?.let {
+                NVMessenger = NVMessenger(it)
             }
         }
     private var latestIdentifiedLoginCredential: LoginCredential? = null
     private lateinit var loginCredentialStore: LoginCredentialStore
-    private lateinit var backgroundMessenger: BackgroundMessenger
+    private lateinit var NVMessenger: NVMessenger
 
     lateinit var conf: MplConfigurations
         private set

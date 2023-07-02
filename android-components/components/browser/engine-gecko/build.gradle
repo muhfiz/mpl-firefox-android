@@ -80,6 +80,7 @@ dependencies {
     testImplementation project(':tooling-fetch-tests')
     testImplementation "io.mockk:mockk:1.13.5"
     testImplementation 'com.google.code.gson:gson:2.10.1'
+    testImplementation 'org.json:json:20220924'
 
     // We only compile against Glean. It's up to the app to add those dependencies
     // if it wants to collect GeckoView telemetry through the Glean SDK.
