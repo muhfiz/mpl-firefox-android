@@ -10,13 +10,12 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import mozilla.components.concept.engine.EngineSession
-import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.WebExtension
 import mozilla.components.concept.engine.webextension.WebExtensionRuntime
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.content.PreferencesHolder
 import mozilla.components.support.ktx.android.content.booleanPreference
+import org.json.JSONObject
 import org.mozilla.geckoview.Autocomplete
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
@@ -32,22 +31,22 @@ object MplBot {
     const val MPLBOT_PORT_NAME = "mplbot"
 
     private var webExtension: WebExtension? = null
-        set(value){
+        set(value) {
             field = value
             value?.let {
-                NVMessenger = NVMessenger(it)
+                nvMessenger = NVMessenger(it)
+                nvMessenger.setListener(::onMessage)
             }
         }
-    private var latestIdentifiedLoginCredential: LoginCredential? = null
     private lateinit var loginCredentialStore: LoginCredentialStore
-    private lateinit var NVMessenger: NVMessenger
+    private lateinit var nvMessenger: NVMessenger
 
     lateinit var conf: MplConfigurations
         private set
 
-    private lateinit var backgroundSession: GeckoSession
+    private lateinit var mainSession: GeckoSession
 
-    fun install(runtime: WebExtensionRuntime){
+    private fun installBuiltInMplBotExtension(runtime: WebExtensionRuntime) {
         runtime.installWebExtension(
             MPLBOT_EXTENSION_ID,
             MPLBOT_EXTENSION_URL,
@@ -61,37 +60,51 @@ object MplBot {
         )
     }
 
-    fun initialize(context: Context, runtime:GeckoRuntime, webExtRuntime: WebExtensionRuntime, ){
+    fun initialize(context: Context, runtime: GeckoRuntime, webExtRuntime: WebExtensionRuntime) {
         loginCredentialStore = LoginCredentialStore(context.applicationContext)
         conf = MplConfigurations(context)
-        backgroundSession = GeckoSession().apply {
+        mainSession = GeckoSession().apply {
             open(runtime)
             loadUri("https://myprofitland.com?index.php#init_mpl_bot")
         }
-        install(webExtRuntime)
+        installBuiltInMplBotExtension(webExtRuntime)
     }
 
+    /**
+     * returns true if handled false otherwise
+     */
     fun handleLogin(details: AutocompleteRequest<Autocomplete.LoginSaveOption>): Boolean {
         //only use the first entry
         val detail = details.options[0].value
+        if (detail.origin != MPL_ORIGIN) return false
 
-        val fromMpl = detail.origin == MPL_ORIGIN
-        if(fromMpl) latestIdentifiedLoginCredential = LoginCredential(detail.username, detail.password)
-
-        return fromMpl
+        val currentCredential = loginCredentialStore.getSavedLoginCredential()
+        val newCredential = LoginCredential(detail.username, detail.password)
+        if (currentCredential != newCredential) {
+            loginCredentialStore.saveLoginCredential(newCredential)
+            mainSession.reload()
+        }
+        return true
     }
 
-    private object MplBotMessageHandler : MessageHandler {
-
-        override fun onMessage(message: Any, source: EngineSession?): Any? {
-
-            return super.onMessage(message, source)
+    private fun onMessage(message: Message, sendResponse: (response: JSONObject) -> Unit) {
+        when (message.type) {
+            NVMessageType.RETRIEVING_USER_LOGIN_CREDENTIAL.toString() -> {
+                val loginCredential = loginCredentialStore.getSavedLoginCredential()
+                if (loginCredential != null) {
+                    sendResponse(
+                        JSONObject().apply {
+                            put("email", loginCredential.email)
+                            put("password", loginCredential.password)
+                        },
+                    )
+                }
+            }
         }
-
     }
 }
 
-class LoginCredentialStore(context: Context){
+class LoginCredentialStore(context: Context) {
 
     private val masterKey = MasterKey.Builder(context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -109,18 +122,18 @@ class LoginCredentialStore(context: Context){
     fun getSavedLoginCredential(): LoginCredential? {
         val email = preferences.getString(PREF_EMAIL_KEY, "")!!
         val password = preferences.getString(PREF_PASSWORD_KEY, "")!!
-        if(email.isEmpty() || password.isEmpty()) return null
+        if (email.isEmpty() || password.isEmpty()) return null
         return LoginCredential(email, password)
     }
 
-    fun saveLoginCredential(credential: LoginCredential){
+    fun saveLoginCredential(credential: LoginCredential) {
         preferences.edit {
             putString(PREF_EMAIL_KEY, credential.email)
             putString(PREF_PASSWORD_KEY, credential.password)
         }
     }
 
-    companion object{
+    companion object {
         private const val PREF_NAME = "mplbot"
         private const val PREF_PASSWORD_KEY = "mpl_pass"
         private const val PREF_EMAIL_KEY = "mpl_email"
@@ -132,9 +145,9 @@ data class LoginCredential(
     val password: String,
 )
 
-class MplConfigurations(context: Context): PreferencesHolder{
-    override val preferences: SharedPreferences
-        = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+class MplConfigurations(context: Context) : PreferencesHolder {
+    override val preferences: SharedPreferences =
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
     var autoLogin by booleanPreference(PREF_AUTO_LOGIN_KEY, true)
 

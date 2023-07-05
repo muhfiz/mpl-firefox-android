@@ -1,6 +1,5 @@
 package mozilla.components.browser.engine.gecko.mpl
 
-import com.google.gson.Gson
 import mozilla.components.browser.engine.gecko.mpl.helper.MessageHelper
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.webextension.MessageHandler
@@ -20,7 +19,7 @@ class NVMessenger(webExtension: WebExtension) {
         setUpMessageHandler(webExtension)
     }
 
-    private fun setUpMessageHandler(webExtension: WebExtension){
+    private fun setUpMessageHandler(webExtension: WebExtension) {
         webExtension.registerBackgroundMessageHandler(
             MplBot.MPLBOT_PORT_NAME,
             object : MessageHandler {
@@ -46,6 +45,7 @@ class NVMessenger(webExtension: WebExtension) {
                         COMMAND_GENERATE_MESSAGE_ID -> {
                             generateMessageId()
                         }
+
                         else -> null
                     }
                 }
@@ -54,9 +54,9 @@ class NVMessenger(webExtension: WebExtension) {
 
     }
 
-    fun onRequestMessageReceived(message: JSONObject, messageId: Int){
+    fun onRequestMessageReceived(message: JSONObject, messageId: Int) {
         messageHelper.fromJson(
-            message
+            message,
         )?.let {
             listener?.invoke(it) { response ->
                 this@NVMessenger.port.postMessage(
@@ -66,7 +66,7 @@ class NVMessenger(webExtension: WebExtension) {
         }
     }
 
-    fun onResponseMessageReceived(message: JSONObject, messageId: Int){
+    fun onResponseMessageReceived(message: JSONObject, messageId: Int) {
         sentMessageResponses[messageId]?.invoke(message)
         sentMessageResponses.remove(messageId)
     }
