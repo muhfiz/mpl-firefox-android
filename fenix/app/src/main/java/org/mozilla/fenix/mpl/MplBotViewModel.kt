@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import mozilla.components.browser.engine.gecko.mpl.MplBot
+import mozilla.components.browser.engine.gecko.mplbot.MplBot
 
 data class MplConfigurationsState(
     val autoLogin: Boolean = true

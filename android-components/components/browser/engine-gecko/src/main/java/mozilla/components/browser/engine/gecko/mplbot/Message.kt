@@ -1,4 +1,4 @@
-package mozilla.components.browser.engine.gecko.mpl
+package mozilla.components.browser.engine.gecko.mplbot
 
 enum class BGMessageType(private val value: String) {
     REQUEST_USER_LOGIN_CREDENTIAL("bg-request-user-login-credential");

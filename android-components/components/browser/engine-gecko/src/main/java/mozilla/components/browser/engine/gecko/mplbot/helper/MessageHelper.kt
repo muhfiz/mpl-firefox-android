@@ -1,7 +1,7 @@
-package mozilla.components.browser.engine.gecko.mpl.helper
+package mozilla.components.browser.engine.gecko.mplbot.helper
 
 import com.google.gson.Gson
-import mozilla.components.browser.engine.gecko.mpl.Message
+import mozilla.components.browser.engine.gecko.mplbot.Message
 import org.json.JSONObject
 
 class MessageHelper {

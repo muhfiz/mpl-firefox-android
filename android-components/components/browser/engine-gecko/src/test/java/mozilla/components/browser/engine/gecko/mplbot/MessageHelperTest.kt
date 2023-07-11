@@ -1,6 +1,6 @@
-package mozilla.components.browser.engine.gecko.mpl
+package mozilla.components.browser.engine.gecko.mplbot
 
-import mozilla.components.browser.engine.gecko.mpl.helper.MessageHelper
+import mozilla.components.browser.engine.gecko.mplbot.helper.MessageHelper
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -1,4 +1,4 @@
-package mozilla.components.browser.engine.gecko.mpl
+package mozilla.components.browser.engine.gecko.mplbot
 
 import com.google.gson.JsonParser
 import io.mockk.CapturingSlot
@@ -7,12 +7,11 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.invoke
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import mozilla.components.browser.engine.gecko.mpl.helper.MessageHelper
+import mozilla.components.browser.engine.gecko.mplbot.helper.MessageHelper
 import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.concept.engine.webextension.WebExtension

@@ -1,6 +1,6 @@
-package mozilla.components.browser.engine.gecko.mpl
+package mozilla.components.browser.engine.gecko.mplbot
 
-import mozilla.components.browser.engine.gecko.mpl.helper.MessageHelper
+import mozilla.components.browser.engine.gecko.mplbot.helper.MessageHelper
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
