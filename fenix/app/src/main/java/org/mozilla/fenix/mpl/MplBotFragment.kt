@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.mozilla.fenix.mpl
 
 import android.os.Bundle
@@ -30,6 +34,14 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import org.mozilla.fenix.theme.FirefoxTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
+import mozilla.components.browser.engine.gecko.mplbot.MplBotScreen
+import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
+import org.mozilla.fenix.BrowserDirection
+import org.mozilla.fenix.HomeActivity
+import org.mozilla.fenix.browser.BrowserFragmentDirections
+import org.mozilla.fenix.browser.browsingmode.BrowsingMode
+import org.mozilla.fenix.components.components
+import org.mozilla.fenix.ext.requireComponents
 
 class MplBotFragment : Fragment() {
     override fun onCreateView(
@@ -39,53 +51,16 @@ class MplBotFragment : Fragment() {
     ): View = ComposeView(requireContext()).apply {
         setContent {
             FirefoxTheme {
-                MplBot(
-                    findNavController(),
-                )
-            }
-        }
-    }
-}
+                MplBotScreen{
+                    val searchEngine = requireComponents.core.store.state.search.selectedOrDefaultSearchEngine
 
-@Composable
-fun MplBot(
-    navController: NavController,
-) {
-    Column(Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text(text = "MplBot Controller") },
-            navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        "Back",
+                    (activity as HomeActivity).openToBrowserAndLoad(
+                        searchTermOrURL = it,
+                        newTab = true,
+                        from = BrowserDirection.FromHome,
+                        engine = searchEngine,
                     )
                 }
-            },
-        )
-        Content(
-            Modifier.fillMaxHeight(),
-        )
-    }
-}
-
-@Composable
-fun Content(modifier: Modifier = Modifier) {
-    LazyColumn(modifier) {
-        item {
-            Row(Modifier.fillMaxWidth()) {
-
-                val mplVM: MplBotViewModel = viewModel()
-                val mplConf by mplVM.mplConfState.collectAsState()
-
-                Text(text = "Auto Login")
-                Spacer(modifier = Modifier.weight(1f))
-                Switch(
-                    modifier = Modifier.semantics { contentDescription = "Demo with icon" },
-                    checked = mplConf.autoLogin,
-                    onCheckedChange = { mplVM.setAutoLogin(it) },
-                )
-
             }
         }
     }

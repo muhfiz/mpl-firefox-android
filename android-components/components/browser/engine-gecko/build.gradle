@@ -44,6 +44,14 @@ android {
         }
     }
 
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.7"
+    }
+
     namespace  'mozilla.components.browser.engine.gecko'
 }
 
@@ -70,6 +78,13 @@ dependencies {
     implementation ComponentsDependencies.androidx_data_store_preferences
     implementation ComponentsDependencies.androidx_lifecycle_livedata
 
+    def composeBom = platform('androidx.compose:compose-bom:2023.05.01')
+    implementation composeBom
+
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+
     testImplementation ComponentsDependencies.androidx_test_core
     testImplementation ComponentsDependencies.androidx_test_junit
     testImplementation ComponentsDependencies.testing_robolectric
@@ -88,10 +103,15 @@ dependencies {
     testImplementation project(":service-glean")
     testImplementation ComponentsDependencies.androidx_work_testing
 
+
     androidTestImplementation ComponentsDependencies.androidx_test_core
     androidTestImplementation ComponentsDependencies.androidx_test_runner
     androidTestImplementation ComponentsDependencies.androidx_test_rules
     androidTestImplementation project(':tooling-fetch-tests')
+    androidTestImplementation composeBom
+
+    // UI Tests
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
 }
 
 apply plugin: "org.mozilla.telemetry.glean-gradle-plugin"
