@@ -17,11 +17,13 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.ext.consumeFrom
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import org.mozilla.fenix.HomeActivity
+import org.mozilla.fenix.NavGraphDirections
 import org.mozilla.fenix.R
 import org.mozilla.fenix.browser.browsingmode.BrowsingMode
 import org.mozilla.fenix.components.StoreProvider
 import org.mozilla.fenix.databinding.FragmentHomeBinding
 import org.mozilla.fenix.ext.hideToolbar
+import org.mozilla.fenix.ext.nav
 import org.mozilla.fenix.ext.requireComponents
 import org.mozilla.fenix.home.HomeMenuView
 import org.mozilla.fenix.home.PrivateBrowsingButtonView
@@ -192,6 +194,15 @@ class OnboardingFragment : Fragment() {
             owner = viewLifecycleOwner,
             view = view,
         )
+
+        binding.mplButton.setOnClickListener {
+            findNavController().let { navController ->
+                navController.nav(
+                    navController.currentDestination?.id,
+                    NavGraphDirections.actionGlobalMplbotFragment()
+                )
+            }
+        }
     }
 
     override fun onResume() {
