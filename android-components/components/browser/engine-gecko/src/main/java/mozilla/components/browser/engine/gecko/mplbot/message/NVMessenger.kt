@@ -1,5 +1,6 @@
 package mozilla.components.browser.engine.gecko.mplbot.message
 
+import mozilla.components.browser.engine.gecko.mplbot.MplBot
 import mozilla.components.browser.engine.gecko.mplbot.helper.MessageHelper
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.webextension.MessageHandler
@@ -51,13 +52,10 @@ class NVMessenger(webExtension: WebExtension) {
                 }
             },
         )
-
     }
 
     fun onRequestMessageReceived(message: JSONObject, messageId: Int) {
-        messageHelper.fromJson(
-            message,
-        )?.let {
+        messageHelper.fromJson(message)?.let {
             listener?.invoke(it) { response ->
                 this@NVMessenger.port.postMessage(
                     bundleResponseMessage(response, messageId),
@@ -68,6 +66,7 @@ class NVMessenger(webExtension: WebExtension) {
 
     fun onResponseMessageReceived(message: JSONObject, messageId: Int) {
         sentMessageResponses[messageId]?.invoke(message)
+        //response only supposed to be called once
         sentMessageResponses.remove(messageId)
     }
 
@@ -106,6 +105,4 @@ class NVMessenger(webExtension: WebExtension) {
 
         private const val COMMAND_GENERATE_MESSAGE_ID = "nvc-generate-message-id"
     }
-
-
 }

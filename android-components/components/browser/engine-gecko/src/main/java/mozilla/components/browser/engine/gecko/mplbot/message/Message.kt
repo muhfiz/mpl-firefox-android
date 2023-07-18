@@ -1,29 +1,46 @@
 package mozilla.components.browser.engine.gecko.mplbot.message
 
-enum class BGMessageType(private val value: String) {
-    REQUEST_USER_LOGIN_CREDENTIAL("bg-request-user-login-credential");
+interface Message {
+    val type: String
+}
+interface Payload<T>{
+    val data: T
+}
 
-    override fun toString(): String {
-        return value
+object NVMessage{
+    class RetrievingUserLoginCredential: Message {
+        override val type: String = TYPE
+        companion object {
+            const val TYPE = "nv-retrieve-user-login-credential"
+        }
+    }
+    class UserLoggedIn(override val data: Data.UserLoginInfo) : Message, Payload<Data.UserLoginInfo> {
+        override val type: String = TYPE
+        companion object {
+            const val TYPE = "nv-user-logged-in"
+        }
+    }
+
+    class WrongCredentialInputted: Message {
+        override val type: String = TYPE
+        companion object {
+            const val TYPE = "nv-user-input-wrong-credential"
+        }
     }
 }
 
-enum class UIMessageType(private val value: String) {
-    LOGIN("ui-login");
-    override fun toString(): String {
-        return value
-    }
-}
-enum class NVMessageType(private val value: String) {
-    RETRIEVING_USER_LOGIN_CREDENTIAL("nv-retrieve-user-login-credential");
-    override fun toString(): String {
-        return value
+object UIMessage {
+    class Login: Message{
+        override val type = TYPE
+        companion object {
+            const val TYPE = "ui-login"
+        }
     }
 }
 
-data class Message (
-    val type: String,
-    val data: Any? = null
-)
-
+object Data {
+    data class UserLoginInfo(
+        val key: String
+    )
+}
 

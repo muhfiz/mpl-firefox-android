@@ -1,11 +1,12 @@
 package mozilla.components.browser.engine.gecko.mplbot
 
 import mozilla.components.browser.engine.gecko.mplbot.helper.MessageHelper
+import mozilla.components.browser.engine.gecko.mplbot.message.NVMessage
 import org.json.JSONObject
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.junit.Assert.*
 
 @RunWith(JUnit4::class)
 class MessageHelperTest {
@@ -14,10 +15,21 @@ class MessageHelperTest {
 
     @Test
     fun shouldBeAbleToConvertJsonObjectToMessage() {
-        val messageType = NVMessageType.RETRIEVING_USER_LOGIN_CREDENTIAL.toString()
+        val messageType = NVMessage.RetrievingUserLoginCredential.TYPE
         val messageJson = JSONObject().apply {
             put("type", messageType)
         }
-        assertEquals(messageHelper.fromJson(messageJson), Message(messageType))
+        val deserializedMessage = messageHelper.fromJson(messageJson)
+        assertNotNull(deserializedMessage)
+        assertTrue(deserializedMessage!!::class == NVMessage.RetrievingUserLoginCredential::class)
+    }
+
+    @Test
+    fun messageData() {
+        val messageJson = JSONObject().apply {
+            put("type", NVMessage.UserLoggedIn.TYPE)
+            put("data", JSONObject().apply { put("key", "userKey") })
+        }
+        assertTrue(NVMessage.UserLoggedIn::class == messageHelper.fromJson(messageJson)!!::class)
     }
 }

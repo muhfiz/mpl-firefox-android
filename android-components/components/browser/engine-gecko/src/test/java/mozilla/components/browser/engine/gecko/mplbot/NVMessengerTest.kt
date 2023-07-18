@@ -12,30 +12,37 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import mozilla.components.browser.engine.gecko.mplbot.helper.MessageHelper
+import mozilla.components.browser.engine.gecko.mplbot.message.NVMessage
+import mozilla.components.browser.engine.gecko.mplbot.message.NVMessenger
+import mozilla.components.browser.engine.gecko.mplbot.message.NVMessengerListener
+import mozilla.components.browser.engine.gecko.mplbot.message.UIMessage
 import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.concept.engine.webextension.WebExtension
 import org.json.JSONObject
-import org.junit.Test
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
+import org.junit.Test
 
 class NVMessengerTest {
 
     @MockK
     lateinit var webExtensionMock: WebExtension
+
     @RelaxedMockK
     lateinit var portMock: Port
     lateinit var messageHandlerSlot: CapturingSlot<MessageHandler>
     lateinit var nvMessenger: NVMessenger
 
     @Before
-    fun setUp(){
+    fun setUp() {
         MockKAnnotations.init(this)
         messageHandlerSlot = slot()
         every {
             webExtensionMock.registerBackgroundMessageHandler(
-                any(), capture(messageHandlerSlot)
+                any(), capture(messageHandlerSlot),
             )
         } just Runs
         nvMessenger = NVMessenger(webExtensionMock)
@@ -43,67 +50,72 @@ class NVMessengerTest {
     }
 
     @Test
-    fun postMessage(){
+    fun postMessage() {
         val exampleMessage =
-            Message(UIMessageType.LOGIN.toString())
+            UIMessage.Login()
         nvMessenger.postMessage(exampleMessage)
         verify {
-            portMock.postMessage(withArg {
-                try{
-                    it.getInt("id")
-                }catch (e: Exception){
-                    fail("Expected no exception, but an exception was thrown: " + e.message)
-                }
-                assertEquals(
-                    JsonParser.parseString(it.optJSONObject("request")?.toString()),
-                    JsonParser.parseString(MessageHelper().toJson(exampleMessage).toString())
-                )
-            })
+            portMock.postMessage(
+                withArg {
+                    try {
+                        it.getInt("id")
+                    } catch (e: Exception) {
+                        fail("Expected no exception, but an exception was thrown: " + e.message)
+                    }
+                    assertEquals(
+                        JsonParser.parseString(it.optJSONObject("request")?.toString()),
+                        JsonParser.parseString(MessageHelper().toJson(exampleMessage).toString()),
+                    )
+                },
+            )
         }
     }
 
     @Test
-    fun setListener(){
+    fun setListener() {
         val listenerMock = mockk<NVMessengerListener>(relaxed = true)
         val messageId = 3
-        val message = Message(
-            NVMessageType.RETRIEVING_USER_LOGIN_CREDENTIAL.toString()
-        )
+        val message = NVMessage.RetrievingUserLoginCredential()
         val jsonMessage = JSONObject().apply {
             put("id", messageId)
             put(
                 "request",
-                MessageHelper().toJson(message)
+                MessageHelper().toJson(message),
             )
         }
         val jsonResponse = JSONObject().apply { put("response", "myResponse") }
         val sendResponseSlot = slot<(JSONObject) -> Unit>()
         every {
             listenerMock.invoke(
-                any(), capture(sendResponseSlot)
+                any(), capture(sendResponseSlot),
             )
         } just Runs
 
         nvMessenger.setListener(listenerMock)
         messageHandlerSlot.captured.onPortMessage(jsonMessage, portMock)
         verify {
-            listenerMock.invoke(withArg {
-                assertEquals(it, message)
-            }, any())
+            listenerMock.invoke(
+                withArg {
+                    assertTrue(it::class == message::class)
+                },
+                any(),
+            )
         }
         sendResponseSlot.captured(jsonResponse)
         verify {
-            portMock.postMessage(withArg {
-                try{
-                    it.getInt("id")
-                }catch (e: Exception){
-                    fail("Expected no exception, but an exception was thrown: " + e.message)
-                }
-                assertEquals(
-                    JsonParser.parseString(it.optJSONObject("response")?.toString()),
-                    JsonParser.parseString(jsonResponse.toString())
-                )
-            })
+            portMock.postMessage(
+                withArg {
+                    try {
+                        it.getInt("id")
+                    } catch (e: Exception) {
+                        fail("Expected no exception, but an exception was thrown: " + e.message)
+                    }
+                    assertEquals(
+                        JsonParser.parseString(it.optJSONObject("response")?.toString()),
+                        JsonParser.parseString(jsonResponse.toString()),
+                    )
+                },
+            )
         }
     }
 }

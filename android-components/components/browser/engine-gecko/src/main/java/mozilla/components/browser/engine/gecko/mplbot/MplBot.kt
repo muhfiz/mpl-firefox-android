@@ -12,6 +12,8 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import mozilla.components.browser.engine.gecko.mplbot.message.NVMessenger
 import mozilla.components.browser.engine.gecko.mplbot.message.Message
+import mozilla.components.browser.engine.gecko.mplbot.message.NVMessage
+import mozilla.components.browser.engine.gecko.mplbot.service.MplBotService
 import mozilla.components.concept.engine.webextension.WebExtension
 import mozilla.components.concept.engine.webextension.WebExtensionRuntime
 import mozilla.components.support.base.log.logger.Logger
@@ -27,7 +29,7 @@ import org.mozilla.geckoview.GeckoSession.PromptDelegate.AutocompleteRequest
 object MplBot {
     private val logger = Logger("mplbot_ext")
 
-    private const val MPL_ORIGIN = "https://myprofitland.com"
+    const val MPL_ORIGIN = "https://myprofitland.com"
     private const val MPLBOT_EXTENSION_ID = "mpl_bot@gmail.com"
     private const val MPLBOT_EXTENSION_URL = "resource://android/assets/extensions/mpl/"
     const val MPLBOT_PORT_NAME = "mplbot"
@@ -90,8 +92,8 @@ object MplBot {
     }
 
     private fun onMessage(message: Message, sendResponse: (response: JSONObject) -> Unit) {
-        when (message.type) {
-            NVMessageType.RETRIEVING_USER_LOGIN_CREDENTIAL.toString() -> {
+        when (message) {
+            is NVMessage.RetrievingUserLoginCredential -> {
                 val loginCredential = loginCredentialStore.getSavedLoginCredential()
                 if (loginCredential != null) {
                     sendResponse(
@@ -101,6 +103,16 @@ object MplBot {
                         },
                     )
                 }
+            }
+            is NVMessage.UserLoggedIn -> {
+                conf.latestKey = message.data.key
+                latestCredential?.let {
+                    loginCredentialStore.saveLoginCredential(it)
+                }
+            }
+            is NVMessage.WrongCredentialInputted -> {
+                latestCredential = null
+                loginCredentialStore.clearLoginCredential()
             }
         }
     }
