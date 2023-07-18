@@ -19,6 +19,7 @@ import mozilla.components.concept.engine.webextension.WebExtensionRuntime
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.content.PreferencesHolder
 import mozilla.components.support.ktx.android.content.booleanPreference
+import mozilla.components.support.ktx.android.content.stringPreference
 import org.json.JSONObject
 import org.mozilla.geckoview.Autocomplete
 import org.mozilla.geckoview.GeckoRuntime
@@ -44,11 +45,12 @@ object MplBot {
         }
     private lateinit var loginCredentialStore: LoginCredentialStore
     private lateinit var nvMessenger: NVMessenger
-
+    private var latestCredential: LoginCredential? = null
     lateinit var conf: MplConfigurations
         private set
 
     private lateinit var mainSession: GeckoSession
+    var initializedRuntime:  GeckoRuntime? = null
 
     private fun installBuiltInMplBotExtension(runtime: WebExtensionRuntime) {
         runtime.installWebExtension(
@@ -65,12 +67,14 @@ object MplBot {
     }
 
     fun initialize(context: Context, runtime: GeckoRuntime, webExtRuntime: WebExtensionRuntime) {
+        initializedRuntime = runtime
         loginCredentialStore = LoginCredentialStore(context.applicationContext)
         conf = MplConfigurations(context)
         mainSession = GeckoSession().apply {
             open(runtime)
             loadUri("https://myprofitland.com?index.php#init_mpl_bot")
         }
+        MplBotService.registerNotificationChannel(context)
         installBuiltInMplBotExtension(webExtRuntime)
     }
 
@@ -82,12 +86,7 @@ object MplBot {
         val detail = details.options[0].value
         if (detail.origin != MPL_ORIGIN) return false
 
-        val currentCredential = loginCredentialStore.getSavedLoginCredential()
-        val newCredential = LoginCredential(detail.username, detail.password)
-        if (currentCredential != newCredential) {
-            loginCredentialStore.saveLoginCredential(newCredential)
-            mainSession.reload()
-        }
+        latestCredential = LoginCredential(detail.username, detail.password)
         return true
     }
 
@@ -156,6 +155,13 @@ class LoginCredentialStore(context: Context) {
         return LoginCredential(email, password)
     }
 
+    fun clearLoginCredential(){
+        preferences.edit {
+            remove(PREF_EMAIL_KEY)
+            remove(PREF_PASSWORD_KEY)
+        }
+    }
+
     fun saveLoginCredential(credential: LoginCredential) {
         preferences.edit {
             putString(PREF_EMAIL_KEY, credential.email)
@@ -181,8 +187,14 @@ class MplConfigurations(context: Context) : PreferencesHolder {
 
     var autoLogin by booleanPreference(PREF_AUTO_LOGIN_KEY, true)
 
+    /**
+     * ?key={latestKey} in the mpl url
+     */
+    var latestKey by stringPreference(PREF_LATEST_USER_KEY, "")
+
     companion object {
         private const val PREF_NAME = "mpl_conf"
         private const val PREF_AUTO_LOGIN_KEY = "auto-login"
+        private const val PREF_LATEST_USER_KEY = "user-key"
     }
 }

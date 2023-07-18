@@ -13,14 +13,19 @@ import org.mozilla.fenix.ext.settings
 import org.mozilla.fenix.helpers.HomeActivityTestRule
 import org.mozilla.fenix.helpers.MatcherHelper.itemWithResId
 import org.mozilla.fenix.helpers.MatcherHelper.itemWithText
-import org.mozilla.fenix.helpers.TestHelper.packageName
+import org.mozilla.fenix.ui.robots.BrowserRobot
 import org.mozilla.fenix.ui.robots.clickPageObject
 import org.mozilla.fenix.ui.robots.navigationToolbar
 import org.mozilla.fenix.ui.robots.setPageObjectText
+import org.junit.Assert.assertEquals
+import mozilla.components.browser.engine.gecko.mplbot.MplBot
+import org.junit.Assert.assertFalse
 
 @RunWith(AndroidJUnit4::class)
 class MplBotTest {
 
+    val email = "muhamadhafiz2508@gmail.com"
+    val password = "Xisme#2020"
     private lateinit var mDevice: UiDevice
 
     @get:Rule
@@ -35,19 +40,9 @@ class MplBotTest {
 
     @Test
     fun autoLoginWhenUserAlreadyLoginBefore(){
-        val email = "muhamadhafiz2508@gmail.com"
-        val password = "Xisme#2020"
         navigationToolbar {
         }.enterURLAndEnterToBrowser(Uri.parse("https://myprofitland.com/")){
-            val loginForm = itemWithResId("form_login")
-            val loginButton = itemWithText("Login")
-            setPageObjectText(loginForm.getChild(UiSelector().focusable(true).index(0)), email)
-            setPageObjectText(loginForm.getChild(UiSelector().focusable(true).index(1)), password)
-            clickPageObject(loginButton)
-            mDevice.waitForIdle()
-            loginForm.waitUntilGone(60000)
-            waitForPageToLoad()
-
+            loginAndWaitMpl(email, password)
             navigationToolbar {
             }.enterURLAndEnterToBrowser(Uri.parse("https://myprofitland.com/logout.php")){
                 waitForPageToLoad()
@@ -55,6 +50,27 @@ class MplBotTest {
                     throw Exception("Auto login not happening")
                 }
             }
+        }
+    }
+
+    private fun BrowserRobot.loginAndWaitMpl(email: String, password: String){
+        waitForPageToLoad()
+        mDevice.waitForIdle()
+        val loginForm = itemWithResId("form_login")
+        val loginButton = itemWithText("Login")
+        setPageObjectText(loginForm.getChild(UiSelector().focusable(true).index(0)), email)
+        setPageObjectText(loginForm.getChild(UiSelector().focusable(true).index(1)), password)
+        clickPageObject(loginButton)
+        mDevice.waitForIdle()
+        waitForPageToLoad()
+    }
+
+    @Test
+    fun notSavingWrongCredential(){
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(Uri.parse("https://myprofitland.com/")){
+            loginAndWaitMpl(email, "wrong password")
+            assertFalse(MplBot.hasUserCredential())
         }
     }
 }
