@@ -26,6 +26,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
+import mozilla.components.browser.engine.gecko.mplbot.MplBot
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.CoreMatchers.not
 import org.junit.Assert.assertFalse
@@ -124,6 +125,13 @@ class NavigationToolbarRobot {
 
             awesomeBar().setText(url.toString())
             mDevice.pressEnter()
+
+            if(url.toString() == "https://myprofitland.com/"){
+                val dialog = mDevice.findObject(UiSelector().resourceId("android:id/button1"));
+                if(dialog.waitForExists(waitingTime)){
+                    dialog.click()
+                }
+            }
 
             runWithIdleRes(sessionLoadedIdlingResource) {
                 assertTrue(
