@@ -1,4 +1,4 @@
-package mozilla.components.browser.engine.gecko.mplbot
+package mozilla.components.browser.engine.gecko.mplbot.message
 
 import mozilla.components.browser.engine.gecko.mplbot.helper.MessageHelper
 import mozilla.components.concept.engine.EngineSession

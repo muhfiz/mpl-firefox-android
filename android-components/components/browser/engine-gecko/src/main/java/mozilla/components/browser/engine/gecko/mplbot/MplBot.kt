@@ -10,6 +10,8 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import mozilla.components.browser.engine.gecko.mplbot.message.NVMessenger
+import mozilla.components.browser.engine.gecko.mplbot.message.Message
 import mozilla.components.concept.engine.webextension.WebExtension
 import mozilla.components.concept.engine.webextension.WebExtensionRuntime
 import mozilla.components.support.base.log.logger.Logger
