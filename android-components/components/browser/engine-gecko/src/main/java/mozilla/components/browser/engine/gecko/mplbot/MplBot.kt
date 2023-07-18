@@ -125,7 +125,7 @@ object MplBot {
     }
 
     fun isFreshLoginPage(url: String): Boolean {
-        return isLoginPage(url) && url.contains("loginerror")
+        return isLoginPage(url) && !url.contains("loginerror")
     }
 
     fun shouldShowWarningOnLoginPage(): Boolean{
