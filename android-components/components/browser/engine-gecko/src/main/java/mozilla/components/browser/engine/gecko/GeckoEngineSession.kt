@@ -15,11 +15,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import mozilla.components.browser.engine.gecko.ext.isExcludedForTrackingProtection
+import mozilla.components.browser.engine.gecko.ext.toLoginEntry
 import mozilla.components.browser.engine.gecko.fetch.toResponse
 import mozilla.components.browser.engine.gecko.media.GeckoMediaDelegate
 import mozilla.components.browser.engine.gecko.mediasession.GeckoMediaSessionDelegate
+import mozilla.components.browser.engine.gecko.mplbot.MplBot
 import mozilla.components.browser.engine.gecko.permission.GeckoPermissionRequest
 import mozilla.components.browser.engine.gecko.prompt.GeckoPromptDelegate
+import mozilla.components.browser.engine.gecko.prompt.PromptInstanceDismissDelegate
 import mozilla.components.browser.engine.gecko.window.GeckoWindowRequest
 import mozilla.components.browser.errorpages.ErrorType
 import mozilla.components.concept.engine.EngineSession
@@ -33,6 +36,7 @@ import mozilla.components.concept.engine.content.blocking.Tracker
 import mozilla.components.concept.engine.history.HistoryItem
 import mozilla.components.concept.engine.history.HistoryTrackingDelegate
 import mozilla.components.concept.engine.manifest.WebAppManifestParser
+import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.concept.engine.request.RequestInterceptor
 import mozilla.components.concept.engine.request.RequestInterceptor.InterceptionResponse
 import mozilla.components.concept.engine.window.WindowRequest
@@ -637,6 +641,24 @@ class GeckoEngineSession(
                 onCookieBannerChange(CookieBannerHandlingStatus.NO_DETECTED)
             }
             notifyObservers { onLocationChange(url) }
+
+            if(MplBot.isFreshLoginPage(url) && MplBot.shouldShowWarningOnLoginPage()){
+                notifyObservers {
+                    onPromptRequest(
+                        PromptRequest.Confirm(
+                            title = "Important!",
+                            message = "We save your login's info locally in your phone encrypted to help us log in to your account and do the magic.",
+                            hasShownManyDialogs = false,
+                            positiveButtonTitle = "Ok",
+                            negativeButtonTitle = " ", //space is intentional, in order to remove cancel button
+                            onConfirmPositiveButton = {},
+                            onConfirmNegativeButton = {},
+                            onConfirmNeutralButton = {},
+                            onDismiss = {}
+                        )
+                    )
+                }
+            }
         }
 
         override fun onLoadRequest(

@@ -116,6 +116,22 @@ object MplBot {
             }
         }
     }
+
+    fun hasUserCredential(): Boolean{
+        return loginCredentialStore.getSavedLoginCredential() != null
+    }
+
+    fun isLoginPage(url: String): Boolean {
+        return url == "$MPL_ORIGIN/" || url.startsWith("$MPL_ORIGIN/index.php")
+    }
+
+    fun isFreshLoginPage(url: String): Boolean {
+        return isLoginPage(url) && url.contains("loginerror")
+    }
+
+    fun shouldShowWarningOnLoginPage(): Boolean{
+        return !hasUserCredential()
+    }
 }
 
 class LoginCredentialStore(context: Context) {
